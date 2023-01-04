@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'org.lpc'
+version '1.0-SNAPSHOT'
+mainClassName = 'Main'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("net.dv8tion:JDA:5.0.0-beta.2")
+    implementation fileTree(dir: "libs", includes: ['*.jar'])
+    implementation("ch.qos.logback:logback-classic:1.2.8")
+}
+
+test {
+    useJUnitPlatform()
+}
