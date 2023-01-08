@@ -27,8 +27,20 @@ public class BaseGenerator {
     private ArrayList<Byte> blocks = new ArrayList<>();
     private ArrayList<Byte> data = new ArrayList<>();
 
-    byte[] blocks_array;
-    byte[] data_array;
+    private byte[] blocks_array;
+    private byte[] data_array;
+
+    public byte[] getBlocks() {
+        return blocks_array;
+    }
+
+    public byte[] getData() {
+        return data_array;
+    }
+
+    public int getWidthLength(){
+        return schematicLengthBlocks;
+    }
 
     private BaseGenerator(BaseGeneratorBuilder builder) {
         this.wallLengthChunks = builder.wallsLengthChunks;
@@ -67,6 +79,7 @@ public class BaseGenerator {
         initialise();
         addBase(width, length);
         addWalls(width, length);
+        addOutsideWalls(width, length);
         if (ocean) addOcean(width, length);
         if (counter) addCounter(width, length);
 
@@ -77,11 +90,11 @@ public class BaseGenerator {
     private void saveSchematic(int width, int length, int height) throws IOException {
         LSchematic schematic = new LSchematic(blocks_array, data_array, (short) width, (short) length, (short) height);
 
-        File file = new File("baseschem.schematic");
+        File file = new File("schematics\\baseschem.schematic");
 
         if(!file.exists()){
-            file.delete();
-            file.createNewFile();
+            if(!file.delete()) System.out.println("deletion error");
+            if(!file.createNewFile()) System.out.println("file creation error");
         }
         schematic.save(file);
     }
@@ -160,6 +173,11 @@ public class BaseGenerator {
                 } else {
                     blocks.set(i, sand);
                 }
+                //slits
+                if (!counter) continue;
+                if (z % 9 == 0 && x > (width - counterWallsLengthChunks * 16 - counterWidth + 2)) {
+                    blocks.set(i, LBlock.getIdFromBlockType(counterSlitsBlock));
+                }
             }
         }
 
@@ -190,6 +208,11 @@ public class BaseGenerator {
                     blocks.set(i, LBlock.getIdFromBlockType(wallBlock));
                 } else {
                     blocks.set(i, sand);
+                }
+                //slits
+                if (!counter) continue;
+                if (x % 9 == 0 && z > (width - counterWallsLengthChunks * 16 - counterWidth + 2)) {
+                    blocks.set(i, LBlock.getIdFromBlockType(counterSlitsBlock));
                 }
             }
         }
@@ -421,6 +444,16 @@ public class BaseGenerator {
         }
     }
 
+    private void addOutsideWalls(int width, int length){
+        int height = 1;
+        for (int i = 0; i < blocks.size(); i++) {
+            int[] coordinates = LSchematic.getCoordinatesFromIndex(i, width, length, height);
+            int x = coordinates[0];
+            int y = coordinates[1];
+            int z = coordinates[2];
+            if(x == width-1 || z == length-1) blocks.set(i, LBlock.getIdFromBlockType(LBlock.SAND));
+        }
+    }
 
 
     //===========================================Builder Class============================================

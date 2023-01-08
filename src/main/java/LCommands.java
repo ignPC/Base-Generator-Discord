@@ -1,9 +1,12 @@
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
@@ -13,17 +16,11 @@ public class LCommands extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event){
         if (event.getName().equals("build")){
             event.deferReply().queue();
-
             genBase(event);
         }
     }
 
     private void genBase(SlashCommandInteractionEvent event) {
-        OptionMapping option1 = event.getOption("base-length");
-        OptionMapping option2 = event.getOption("wall-length");
-        OptionMapping option3 = event.getOption("wall-block");
-
-
         int baselength = event.getOption("base-length").getAsInt();
         int wallslength = event.getOption("wall-length").getAsInt();
         String wallsblock = event.getOption("wall-block").getAsString();
@@ -83,45 +80,51 @@ public class LCommands extends ListenerAdapter {
             e.printStackTrace();
         }
 
-        String message = "Generating base: \n";
+        EmbedBuilder embedBuilder = new EmbedBuilder();
 
-        message += "Base length: " + baselength + "\n";
-        message += "Walls length: " + wallslength + "\n";
-        message += "Block: " + wallsblock + "\n";
+        embedBuilder.setTitle("Base Schematic");
+        embedBuilder.setDescription("Schematic created using BaseBuilder");
+
+        embedBuilder.addField("Base length", String.valueOf(baselength), false);
+        embedBuilder.addField("Walls length", String.valueOf(wallslength), false);
+        embedBuilder.addField("Block", wallsblock, false);
 
         if (event.getOption("border-offset-blocks") != null) {
-            message += "Border offset blocks: " + borderOffsetBlocks + "\n";
-        }
-
-        if (event.getOption("ocean-chunk") != null) {
-            message += "Ocean chunk: " + oceanChunk + "\n";
+            embedBuilder.addField("Border offset blocks", String.valueOf(borderOffsetBlocks), false);
         }
 
         if (event.getOption("ocean-chunk-offset") != null) {
-            message += "Ocean chunk offset: " + oceanChunkOffset + "\n";
+            embedBuilder.addField("Ocean chunk offset", String.valueOf(oceanChunkOffset), false);
         }
 
         if (event.getOption("sand-walls") != null) {
-            message += "Sand walls: " + sandWalls + "\n";
-        }
-
-        if (event.getOption("counter") != null) {
-            message += "Counter: " + counter + "\n";
+            embedBuilder.addField("Sand walls", String.valueOf(sandWalls), false);
         }
 
         if (event.getOption("counter-length") != null) {
-            message += "Counter length: " + counterLength + "\n";
+            embedBuilder.addField("Counter length", String.valueOf(counterLength), false);
         }
 
         if (event.getOption("counter-width") != null) {
-            message += "Counter width: " + counterWidth + "\n";
+            embedBuilder.addField("Counter width", String.valueOf(counterWidth), false);
         }
 
         if (event.getOption("counter-wall-length") != null) {
-            message += "Counter wall length: " + counterWallLength;
+            embedBuilder.addField("Counter wall length", String.valueOf(counterWallLength), false);
+        }
+        embedBuilder.setColor(Color.BLUE);
+
+        MessageEmbed embed = embedBuilder.build();
+
+        ImageGenerator.CreateImageFromByteArray(generator.getBlocks(), generator.getWidthLength(), generator.getWidthLength());
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        event.getHook().sendMessage(message).addFiles(FileUpload.fromData(new File("baseschem.schematic"))).queue();
-
+        event.getHook().sendMessageEmbeds(embed).queue();
+        event.getHook().sendFiles(FileUpload.fromData(new File("schematics\\baseschem.schematic")), FileUpload.fromData(new File("schematics\\image.png"))).queue();
     }
 }

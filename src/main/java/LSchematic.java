@@ -54,7 +54,7 @@ public class LSchematic {
 
     public void save(File file) {
         try (NBTOutputStream nbtStream = new NBTOutputStream(new FileOutputStream(file))) {
-            Map<String, Tag> schematic = new HashMap<String, Tag>();
+            Map<String, Tag> schematic = new HashMap<>();
 
             schematic.put("Width", new ShortTag(width));
             schematic.put("Height", new ShortTag(height));
